@@ -1,4 +1,4 @@
-# Agave 
+# Agave
 
 Agave seed, once planted, takes _x_ time to germinate, with success rate of _i_.
 
@@ -6,9 +6,9 @@ Agave once germinated, takes _y_ time to blossom, where it will produce _n_ seed
 
 Seeds are then planted, and the cycle continues.
 
-Soon after blossoming, agave dies.
+After blossoming, agave dies.
 
-Each new seed has a chance of being less successful than the previous generation by degeneration rate _d_, degrading success rate _i_ more by each generation.
+Each new seed generation has a lower success rate to germinate than the previous generation by degeneration rate of _d_, degrading success rate of _i_ more by each generation.
 
 ## Example
 
