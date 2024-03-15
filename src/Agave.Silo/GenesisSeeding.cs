@@ -1,20 +1,14 @@
 namespace Agave.Silo;
 
-internal class GenesisSeeding : IStartupTask
+internal class GenesisSeeding(IGrainFactory grainFactory, ILoggerFactory loggerFactory) : IStartupTask
 {
-    private readonly IGrainFactory _grainFactory;
-    private readonly ILogger<GenesisSeeding> _logger;
+    private readonly IGrainFactory _grainFactory = grainFactory;
+    private readonly ILogger<GenesisSeeding> _logger = loggerFactory.CreateLogger<GenesisSeeding>();
 
-    public GenesisSeeding(IGrainFactory grainFactory, ILoggerFactory loggerFactory)
-    {
-        _grainFactory = grainFactory;
-        _logger = loggerFactory.CreateLogger<GenesisSeeding>();
-    }
-
-    public Task Execute(CancellationToken cancellationToken)
+    public async Task Execute(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Seeding the initial seed.");
-        return Task.CompletedTask;
+        await _grainFactory.GetGrain<IAgave>(Guid.NewGuid()).Plant();
     }
 }
 

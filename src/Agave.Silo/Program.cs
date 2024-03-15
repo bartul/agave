@@ -2,7 +2,6 @@ using Agave.Silo;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// builder.Services.AddLocalStorageServices();
 if(builder.Environment.IsDevelopment())
 {
     builder.UseOrleans((siloBuilder) =>
