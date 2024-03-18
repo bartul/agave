@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Agave.Tests;
 
-public class AgaveTests
+public partial class AgaveTests
 {
     private readonly LoggerFactory _loggerFactory;
 
@@ -14,11 +14,14 @@ public class AgaveTests
     }
 
     [Fact]
-    public async void WhenAgaveIsPlanted_ThenDoNothing()
+    public async void WhenPlantCommandIsExecuted_ThenAgaveIsPlanted()
     {
-        var agaveId = Guid.NewGuid();   
-        IAgave agave = new Agave(_loggerFactory, () => agaveId);
+        var agaveId = Guid.NewGuid();
+        var state = new AgaveState();
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), _loggerFactory, () => agaveId);
         await agave.Plant();
+
+        Assert.Equal(AgaveBlossomState.Planted, state.Current);
     }
 }
 

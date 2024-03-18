@@ -29,7 +29,7 @@ else
 
         siloBuilder
             .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
-            .AddCosmosGrainStorage("agave", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
+            .AddCosmosGrainStorage("agave_ecosystem_store", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
             .AddEventHubStreams("ActorEventHub", options =>
             {
                 // options.ConnectionOptions.ConnectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_EVENT_HUB_CONNECTION_STRING") ?? "";
