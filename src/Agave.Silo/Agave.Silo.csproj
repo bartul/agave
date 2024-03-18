@@ -12,5 +12,7 @@
     <PackageReference Include="Microsoft.Orleans.Clustering.Cosmos" Version="8.0.0" />
     <PackageReference Include="Microsoft.Orleans.Persistence.Cosmos" Version="8.0.0" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Streaming.EventHubs" Version="8.0.0" />
   </ItemGroup>
 </Project>

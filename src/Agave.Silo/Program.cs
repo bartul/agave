@@ -9,6 +9,9 @@ if(builder.Environment.IsDevelopment())
         siloBuilder
             .UseLocalhostClustering()
             .AddMemoryGrainStorage("agave")
+            .AddMemoryGrainStorage("ActorEventHub")
+            .AddMemoryStreams("ActorEventHub")
+
             .AddStartupTask<GenesisSeeding>();
     });
 }
@@ -26,7 +29,13 @@ else
 
         siloBuilder
             .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
-            .AddCosmosGrainStorage("agave", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString));
+            .AddCosmosGrainStorage("agave", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
+            .AddEventHubStreams("ActorEventHub", options =>
+            {
+                // options.ConnectionOptions.ConnectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_EVENT_HUB_CONNECTION_STRING") ?? "";
+                // options.ConsumerGroup = builder.Configuration.GetValue<string>("ORLEANS_AZURE_EVENT_HUB_CONSUMER_GROUP") ?? "";
+                // options.Path = builder.Configuration.GetValue<string>("ORLEANS_AZURE_EVENT_HUB_PATH") ?? "";
+            });
     });
 }
 

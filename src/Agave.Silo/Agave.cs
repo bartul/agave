@@ -1,3 +1,5 @@
+using OrleansCodeGen.Orleans;
+
 namespace Agave
 
 {
@@ -14,18 +16,19 @@ namespace Agave
             _identity = identity ?? this.GetPrimaryKey;
         }
 
-        Task IAgave.Plant()
+        async Task IAgave.Plant()
         {
             _logger.LogInformation($"Planting the agave {_identity()}.");
-
-            // this.GetStreamProvider("EventHub")
-            //     .GetStream<AgavePlantedEvent>(_identity(), "AgavePlanted")
-            //     .OnNextAsync(new AgavePlantedEvent(_identity()));
-
-
-
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
+    }
+
+    [GenerateSerializer, Immutable]
+    [Alias("Agave.AgavePlanted")]
+    internal record AgavePlanted(Guid AgaveId)
+    {
+        [Id(0)]
+        public Guid AgaveId { get; init; } = AgaveId;
     }
 
     [Alias("Agave.IAgave")]
