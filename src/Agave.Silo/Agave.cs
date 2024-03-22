@@ -3,7 +3,7 @@ using Orleans.Timers;
 namespace Agave
 
 {
-    public sealed class Agave : IAgave, IRemindable
+    public sealed class Agave : IAgave
     {
         private readonly ILogger _logger;
         private readonly IPersistentState<AgaveState> _storage;
@@ -81,7 +81,7 @@ namespace Agave
     }
 
     [Alias("Agave.IAgave")]
-    public interface IAgave : IGrainWithGuidKey
+    public interface IAgave : IGrainWithGuidKey, IRemindable
     {
         [Alias("Plant")]
         Task Plant();
