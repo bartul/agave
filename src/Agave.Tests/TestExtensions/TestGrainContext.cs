@@ -2,14 +2,14 @@ using Orleans.Runtime;
 
 namespace Agave.Tests.TestExtensions;
 
-internal class TestGrainContext : IGrainContext
+internal class TestGrainContext<T> : IGrainContext
 {
     public GrainReference GrainReference => throw new NotImplementedException();
 
     public GrainId GrainId
     {
 
-        get => GrainId.Create("Agave", Guid.NewGuid().ToString());
+        get => GrainId.Create(typeof(T).Name, Guid.NewGuid().ToString());
 
     }
 

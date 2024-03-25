@@ -3,6 +3,7 @@ using Orleans.Timers;
 namespace Agave
 
 {
+    [GrainType("agave")]
     public sealed class Agave : IAgave
     {
         private readonly ILogger _logger;

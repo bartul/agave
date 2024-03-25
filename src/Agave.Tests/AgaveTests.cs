@@ -17,7 +17,7 @@ public partial class AgaveTests
     public async void WhenPlantCommandIsExecuted_ThenAgaveIsPlanted()
     {
         var state = new AgaveState();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext(), new TestReminderRegistry(), _loggerFactory);
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), new TestReminderRegistry(), _loggerFactory);
         await agave.Plant();
 
         Assert.Equal(AgaveBlossomState.Planted, state.Current);
@@ -28,7 +28,7 @@ public partial class AgaveTests
     {
         var state = new AgaveState();
         var reminderRegistry = new TestReminderRegistry();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext(), reminderRegistry, _loggerFactory);
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));  
         await agave.Plant();
 
