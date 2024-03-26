@@ -18,23 +18,36 @@ public partial class AgaveTests
     {
         var state = new AgaveState();
         IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), new TestReminderRegistry(), _loggerFactory);
-        await agave.Plant();
+        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromSeconds(5), SuccessRate: 1, DegenerationRate: 0.1));
 
         Assert.Equal(AgaveBlossomState.Planted, state.Current);
     }
 
     [Fact]
-    public async void GivenPlanted_When10SecondsPasses_ThenAgaveIsGerminatedOrDead()
+    public async void GivenPlanted_WhenTimeToGerminateExpires_ThenAgaveIsGerminatedOrDead()
     {
         var state = new AgaveState();
         var reminderRegistry = new TestReminderRegistry();
         IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
-        await agave.Plant();
+        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1));
 
-        reminderRegistry.AdvanceTime(TimeSpan.FromSeconds(6));
+        reminderRegistry.AdvanceTime(TimeSpan.FromDays(6));
 
         Assert.Contains(new[] { state.Current }, item => item == AgaveBlossomState.Germinated || item == AgaveBlossomState.Dead);
+    }
+    [Fact]
+    public async void GivenPlanted_WhenTimeToGerminateHasNotPassed_ThenAgaveIsStillPlanted()
+    {
+        var state = new AgaveState();
+        var reminderRegistry = new TestReminderRegistry();
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
+        reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
+        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1));
+
+        reminderRegistry.AdvanceTime(TimeSpan.FromDays(2));
+
+        Assert.Equal(AgaveBlossomState.Planted, state.Current);
     }
 }
 

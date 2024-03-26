@@ -25,15 +25,18 @@ namespace Agave
             _logger = loggerFactory.CreateLogger<Agave>();
         }
 
-        async Task IAgave.Plant()
+        async Task IAgave.Plant(PlantSeedCommand plantSeedCommand)
         {
-            _logger.LogInformation($"Planting the agave {_grainContext.GrainId}.");
+            _logger.LogInformation("Planting the agave {GrainId}.", _grainContext.GrainId);
             _storage.State.Current = AgaveBlossomState.Planted;
+            _storage.State.TimeToGerminate = plantSeedCommand.TimeToGerminate;
+            _storage.State.SuccessRate = plantSeedCommand.SuccessRate;
+            _storage.State.DegenerationRate = plantSeedCommand.DegenerationRate;
 
             _reminder = await _reminderRegistry.RegisterOrUpdateReminder(
                 callingGrainId: _grainContext.GrainId,
                 reminderName: nameof(TimeToGerminateArrived),
-                dueTime: TimeSpan.FromSeconds(5),
+                dueTime: plantSeedCommand.TimeToGerminate,
                 period: TimeSpan.FromHours(24));
 
             await _storage.WriteStateAsync();
@@ -44,7 +47,7 @@ namespace Agave
             int decision = _random.Next(1, 3);
             _logger.LogInformation($"Agave {_grainContext.GrainId} is deciding to germinate or die. Decision: {decision}.");
 
-            if(decision == 1)
+            if (decision == 1)
             {
                 await Dead();
             }
@@ -81,9 +84,17 @@ namespace Agave
     }
 
     [GenerateSerializer, Immutable]
-    public record AgaveState
+    [Alias("Agave.AgaveState")]
+    public record AgaveState()
     {
-        public AgaveBlossomState Current { get; set; }
+        [Id(0)]
+        public AgaveBlossomState Current { get; set; } = AgaveBlossomState.Planted;
+        [Id(1)]
+        public TimeSpan TimeToGerminate { get; set; } = TimeSpan.Zero;
+        [Id(2)]
+        public double SuccessRate { get; set; } = 0;
+        [Id(3)]
+        public double DegenerationRate { get; set; } = 0;
     }
 
     [GenerateSerializer]
@@ -97,16 +108,34 @@ namespace Agave
 
     [GenerateSerializer, Immutable]
     [Alias("Agave.AgavePlanted")]
-    internal record AgavePlanted(Guid AgaveId)
+    internal record AgavePlanted(Guid AgaveId, TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate)
     {
         [Id(0)]
         public Guid AgaveId { get; init; } = AgaveId;
+        [Id(1)]
+        public TimeSpan TimeToGerminate { get; init; } = TimeToGerminate;
+        [Id(2)]
+        public double SuccessRate { get; init; } = SuccessRate;
+        [Id(3)]
+        public double DegenerationRate { get; init; } = DegenerationRate;
     }
 
     [Alias("Agave.IAgave")]
     public interface IAgave : IGrainWithGuidKey, IRemindable
     {
         [Alias("Plant")]
-        Task Plant();
+        Task Plant(PlantSeedCommand command);
+    }
+
+    [GenerateSerializer, Immutable]
+    [Alias("Agave.PlantSeedCommand")]
+    public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate)
+    {
+        [Id(0)]
+        public TimeSpan TimeToGerminate { get; init; } = TimeToGerminate;
+        [Id(1)]
+        public double SuccessRate { get; init; } = SuccessRate;
+        [Id(2)]
+        public double DegenerationRate { get; init; } = DegenerationRate;
     }
 }
