@@ -4,14 +4,11 @@ namespace Agave.Tests.TestExtensions;
 
 internal class TestGrainContext<T> : IGrainContext
 {
+    private readonly GrainId _grainId = GrainId.Create(typeof(T).Name, Guid.NewGuid().ToString());
+
     public GrainReference GrainReference => throw new NotImplementedException();
 
-    public GrainId GrainId
-    {
-
-        get => GrainId.Create(typeof(T).Name, Guid.NewGuid().ToString());
-
-    }
+    public GrainId GrainId => _grainId;
 
     public object GrainInstance => throw new NotImplementedException();
 

@@ -11,6 +11,7 @@ namespace Agave
         private readonly IGrainContext _grainContext;
         private readonly IReminderRegistry _reminderRegistry;
         private IGrainReminder? _reminder;
+        private readonly Random _random = new(DateTime.Now.Millisecond);
 
         public Agave(
             [PersistentState("agave_ecosystem_store", "agave")] IPersistentState<AgaveState> storage,
@@ -31,12 +32,26 @@ namespace Agave
 
             _reminder = await _reminderRegistry.RegisterOrUpdateReminder(
                 callingGrainId: _grainContext.GrainId,
-                
-                reminderName: "Germinate",
+                reminderName: nameof(TimeToGerminateArrived),
                 dueTime: TimeSpan.FromSeconds(5),
                 period: TimeSpan.FromHours(24));
 
             await _storage.WriteStateAsync();
+        }
+
+        private async Task TimeToGerminateArrived()
+        {
+            int decision = _random.Next(1, 3);
+            _logger.LogInformation($"Agave {_grainContext.GrainId} is deciding to germinate or die. Decision: {decision}.");
+
+            if(decision == 1)
+            {
+                await Dead();
+            }
+            else
+            {
+                await Germinate();
+            }
         }
 
         private async Task Germinate()
@@ -44,16 +59,23 @@ namespace Agave
             _logger.LogInformation($"Agave {_grainContext.GrainId} germinated.");
             _storage.State.Current = AgaveBlossomState.Germinated;
 
-            await _reminderRegistry.UnregisterReminder(_grainContext.GrainId, _reminder);
+            await _storage.WriteStateAsync();
+        }
+        private async Task Dead()
+        {
+            _logger.LogInformation($"Agave {_grainContext.GrainId} died.");
+            _storage.State.Current = AgaveBlossomState.Dead;
+
             await _storage.WriteStateAsync();
         }
 
         async Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
         {
             _logger.LogInformation($"Got reminder {reminderName}.");
-            if (reminderName == "Germinate")
+            if (reminderName == nameof(TimeToGerminateArrived))
             {
-                await Germinate();
+                await TimeToGerminateArrived();
+                await _reminderRegistry.UnregisterReminderByName(_grainContext.GrainId, reminderName);
             }
         }
     }

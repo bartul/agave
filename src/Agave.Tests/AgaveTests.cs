@@ -24,17 +24,17 @@ public partial class AgaveTests
     }
 
     [Fact]
-    public async void GivenPlanted_When10SecondsPasses_ThenAgaveIsGerminated()
+    public async void GivenPlanted_When10SecondsPasses_ThenAgaveIsGerminatedOrDead()
     {
         var state = new AgaveState();
         var reminderRegistry = new TestReminderRegistry();
         IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
-        reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));  
+        reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
         await agave.Plant();
 
         reminderRegistry.AdvanceTime(TimeSpan.FromSeconds(6));
 
-        Assert.Equal(AgaveBlossomState.Germinated, state.Current);
+        Assert.Contains(new[] { state.Current }, item => item == AgaveBlossomState.Germinated || item == AgaveBlossomState.Dead);
     }
 }
 
