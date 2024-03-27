@@ -20,12 +20,14 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: 
+        dotnet build 
+        --no-restore 
+        --configuration Release
     - name: Test
-      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test_results.xml"
-    - name: Publish Test Results
-      uses: dorny/test-reporter@v1
-      with:
-        name: Test Results
-        path: '**/test_results.xml'
-        reporter: dotnet-trx
+      run: 
+        dotnet test 
+        --no-build 
+        --configuration Release 
+        --verbosity normal 
+        --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
