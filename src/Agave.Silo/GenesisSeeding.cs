@@ -8,7 +8,7 @@ internal class GenesisSeeding(IGrainFactory grainFactory, ILoggerFactory loggerF
     public async Task Execute(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Seeding the initial seed.");
-        await _grainFactory.GetGrain<IAgave>(Guid.NewGuid()).Plant(new PlantSeedCommand(TimeSpan.FromSeconds(5), 1, 0.1));
+        await _grainFactory.GetGrain<IAgave>(Guid.NewGuid()).Plant(new PlantSeedCommand(TimeSpan.FromSeconds(5), 1, 0.1, TimeSpan.FromSeconds(5)));
     }
 }
 

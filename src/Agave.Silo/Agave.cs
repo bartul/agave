@@ -31,6 +31,7 @@ namespace Agave
             _storage.State.TimeToGerminate = plantSeedCommand.TimeToGerminate;
             _storage.State.SuccessRate = plantSeedCommand.SuccessRate;
             _storage.State.DegenerationRate = plantSeedCommand.DegenerationRate;
+            _storage.State.TimeToBlossom = plantSeedCommand.TimeToBlossom;
 
             await _reminderRegistry.RegisterOrUpdateReminder(
                 callingGrainId: _grainContext.GrainId,
@@ -40,7 +41,7 @@ namespace Agave
             await _storage.WriteStateAsync();
         }
 
-        private async Task TimeToGerminateArrived()
+        public async Task TimeToGerminateArrived()
         {
             int decision = _random.Next(1, 3);
             _logger.LogInformation($"Agave {_grainContext.GrainId} is deciding to germinate or die. Decision: {decision}.");
@@ -55,15 +56,28 @@ namespace Agave
             }
         }
 
-        private async Task Germinate()
+        public async Task Germinate()
         {
             _logger.LogInformation($"Agave {_grainContext.GrainId} germinated.");
             _storage.State.Current = AgaveBlossomState.Germinated;
 
+            await _reminderRegistry.RegisterOrUpdateReminder(
+                callingGrainId: _grainContext.GrainId,
+                reminderName: nameof(TimeToBlossomArrived),
+                dueTime: _storage.State.TimeToBlossom);
+
             await _storage.WriteStateAsync();
         }
-        
-        private async Task Die()
+
+        public async Task TimeToBlossomArrived()
+        {
+            _logger.LogInformation($"Agave {_grainContext.GrainId} blossomed.");
+            _storage.State.Current = AgaveBlossomState.Blossomed;
+
+            await _storage.WriteStateAsync();
+        }
+
+        public async Task Die()
         {
             _logger.LogInformation($"Agave {_grainContext.GrainId} died.");
             _storage.State.Current = AgaveBlossomState.Dead;
@@ -74,11 +88,12 @@ namespace Agave
         async Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
         {
             _logger.LogInformation($"Got reminder {reminderName}.");
-            if (reminderName == nameof(TimeToGerminateArrived))
+            switch (reminderName)
             {
-                await TimeToGerminateArrived();
-                await _reminderRegistry.UnregisterReminderByName(_grainContext.GrainId, reminderName);
+                case nameof(TimeToGerminateArrived): await TimeToGerminateArrived(); break;
+                case nameof(TimeToBlossomArrived): await TimeToBlossomArrived(); break;
             }
+            await _reminderRegistry.UnregisterReminderByName(_grainContext.GrainId, reminderName);
         }
     }
 
@@ -94,6 +109,8 @@ namespace Agave
         public double SuccessRate { get; set; } = 0;
         [Id(3)]
         public double DegenerationRate { get; set; } = 0;
+        [Id(4)]
+        public TimeSpan TimeToBlossom { get; set; } = TimeSpan.Zero;
     }
 
     [GenerateSerializer]
@@ -128,7 +145,7 @@ namespace Agave
 
     [GenerateSerializer, Immutable]
     [Alias("Agave.PlantSeedCommand")]
-    public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate)
+    public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate, TimeSpan TimeToBlossom)
     {
         [Id(0)]
         public TimeSpan TimeToGerminate { get; init; } = TimeToGerminate;
@@ -136,5 +153,7 @@ namespace Agave
         public double SuccessRate { get; init; } = SuccessRate;
         [Id(2)]
         public double DegenerationRate { get; init; } = DegenerationRate;
+        [Id(3)]
+        public TimeSpan TimeToBlossom { get; init; } = TimeToBlossom;
     }
 }
