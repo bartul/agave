@@ -1,21 +1,16 @@
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 
 namespace Agave.Tests.TestExtensions
 {
-    public class XunitLoggerProvider : ILoggerProvider
+    public class XunitLoggerProvider(ITestOutputHelper output) : ILoggerProvider
     {
-        private readonly ITestOutputHelper output;
-
-        public XunitLoggerProvider(ITestOutputHelper output)
-        {
-            this.output = output;
-        }
+        private readonly ITestOutputHelper output = output;
 
         public ILogger CreateLogger(string categoryName) => new XunitLogger(this.output, categoryName);
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
+            GC.SuppressFinalize(this);
         }
 
         private class XunitLogger : ILogger, IDisposable

@@ -10,7 +10,6 @@ namespace Agave
         private readonly IPersistentState<AgaveState> _storage;
         private readonly IGrainContext _grainContext;
         private readonly IReminderRegistry _reminderRegistry;
-        private IGrainReminder? _reminder;
         private readonly Random _random = new(DateTime.Now.Millisecond);
 
         public Agave(
@@ -33,11 +32,10 @@ namespace Agave
             _storage.State.SuccessRate = plantSeedCommand.SuccessRate;
             _storage.State.DegenerationRate = plantSeedCommand.DegenerationRate;
 
-            _reminder = await _reminderRegistry.RegisterOrUpdateReminder(
+            await _reminderRegistry.RegisterOrUpdateReminder(
                 callingGrainId: _grainContext.GrainId,
                 reminderName: nameof(TimeToGerminateArrived),
-                dueTime: plantSeedCommand.TimeToGerminate,
-                period: TimeSpan.FromHours(24));
+                dueTime: plantSeedCommand.TimeToGerminate);
 
             await _storage.WriteStateAsync();
         }
@@ -49,7 +47,7 @@ namespace Agave
 
             if (decision == 1)
             {
-                await Dead();
+                await Die();
             }
             else
             {
@@ -64,7 +62,8 @@ namespace Agave
 
             await _storage.WriteStateAsync();
         }
-        private async Task Dead()
+        
+        private async Task Die()
         {
             _logger.LogInformation($"Agave {_grainContext.GrainId} died.");
             _storage.State.Current = AgaveBlossomState.Dead;
