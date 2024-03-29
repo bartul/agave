@@ -32,7 +32,7 @@ public sealed class Agave : IAgave
         _storage.State.DegenerationRate = plantSeedCommand.DegenerationRate;
         _storage.State.TimeToBlossom = plantSeedCommand.TimeToBlossom;
 
-        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current);
+        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
 
         await _reminderRegistry.RegisterOrUpdateReminder(
             callingGrainId: _grainContext.GrainId,
@@ -60,7 +60,7 @@ public sealed class Agave : IAgave
     public async Task Germinate()
     {
         _storage.State.Current = AgaveBlossomState.Germinated;
-        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current);
+        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
 
         await _reminderRegistry.RegisterOrUpdateReminder(
             callingGrainId: _grainContext.GrainId,
@@ -75,7 +75,7 @@ public sealed class Agave : IAgave
     public async Task Blossom()
     {
         _storage.State.Current = AgaveBlossomState.Blossomed;
-        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current);
+        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
 
         await _storage.WriteStateAsync();
     }
@@ -83,7 +83,7 @@ public sealed class Agave : IAgave
     public async Task Die()
     {
         _storage.State.Current = AgaveBlossomState.Dead;
-        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current);
+        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
 
         await _storage.WriteStateAsync();
     }

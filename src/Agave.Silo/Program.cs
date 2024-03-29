@@ -1,9 +1,11 @@
 using Agave.Silo;
+using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 if(builder.Environment.IsDevelopment())
 {
+
     builder.UseOrleans((siloBuilder) =>
     {
         siloBuilder
@@ -14,6 +16,25 @@ if(builder.Environment.IsDevelopment())
 
             .AddStartupTask<GenesisSeeding>();
     });
+    builder.Logging
+        .EnableEnrichment()
+        .AddJsonConsole(o => o.JsonWriterOptions = new System.Text.Json.JsonWriterOptions() { Indented = true });
+    builder.Services
+        .AddApplicationMetadata(md =>
+        {
+            md.ApplicationName = nameof(Agave);
+            md.BuildVersion = "1.0.0";
+            md.EnvironmentName = builder.Environment.EnvironmentName;
+        
+        })
+        .AddProcessLogEnricher(e => e.ProcessId = true)
+        .AddServiceLogEnricher(e =>
+        {
+            e.ApplicationName = true;
+            e.BuildVersion = true;
+            e.EnvironmentName = true;
+        });
+
 }
 else
 {
