@@ -36,5 +36,7 @@ else
 
 
 var host = builder.Build();
+var logger = host.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("Starting Agave Silo");
 host.Run();
 

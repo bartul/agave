@@ -6,18 +6,18 @@ namespace Agave.Tests;
 
 public partial class AgaveTests
 {
-    private readonly LoggerFactory _loggerFactory;
+    private readonly ILogger<Agave> _logger;
 
     public AgaveTests(ITestOutputHelper output)
     {
-        _loggerFactory = new LoggerFactory([new XunitLoggerProvider(output)]);
+        _logger = new LoggerFactory([new XunitLoggerProvider(output)]).CreateLogger<Agave>();
     }
 
     [Fact]
     public async void WhenPlantCommandIsExecuted_ThenAgaveIsPlanted()
     {
         var state = new AgaveState();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), new TestReminderRegistry(), _loggerFactory);
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), new TestReminderRegistry(), _logger);
 
         await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromSeconds(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10)));
 
@@ -30,7 +30,7 @@ public partial class AgaveTests
         var state = new AgaveState();
 
         var reminderRegistry = new TestReminderRegistry();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10)));
@@ -46,7 +46,7 @@ public partial class AgaveTests
         var state = new AgaveState();
 
         var reminderRegistry = new TestReminderRegistry();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromDays(10)));
@@ -68,7 +68,7 @@ public partial class AgaveTests
         };
 
         var reminderRegistry = new TestReminderRegistry();
-        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
+        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await (agave as IRemindable).ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Germinate();
@@ -89,7 +89,7 @@ public partial class AgaveTests
         };
 
         var reminderRegistry = new TestReminderRegistry();
-        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _loggerFactory);
+        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await (agave as IRemindable).ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Germinate();
