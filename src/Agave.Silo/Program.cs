@@ -1,40 +1,71 @@
 using Agave.Silo;
-using Microsoft.Extensions.Logging;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 
 var builder = Host.CreateApplicationBuilder(args);
+builder.Environment.ApplicationName = nameof(Agave);
+var applicationVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
 
-if(builder.Environment.IsDevelopment())
+builder.Services
+    .AddApplicationMetadata(md =>
+    {
+        md.ApplicationName = builder.Environment.ApplicationName;
+        md.BuildVersion = applicationVersion;
+        md.EnvironmentName = builder.Environment.EnvironmentName;
+    })
+    .AddProcessLogEnricher(e => e.ProcessId = true)
+    .AddServiceLogEnricher(e =>
+    {
+        e.ApplicationName = true;
+        e.BuildVersion = true;
+        e.EnvironmentName = true;
+    });
+builder.Logging
+    .EnableEnrichment()
+    .AddJsonConsole(o => o.JsonWriterOptions = new System.Text.Json.JsonWriterOptions() { Indented = true });
+
+if (builder.Environment.IsDevelopment())
 {
-
     builder.UseOrleans((siloBuilder) =>
     {
         siloBuilder
             .UseLocalhostClustering()
             .AddMemoryGrainStorage("agave")
-            // .AddMemoryGrainStorage("ActorEventHub")
             .UseInMemoryReminderService()
-            .AddStartupTask<GenesisSeeding>()
-            ;
+            .AddStartupTask<GenesisSeeding>();
     });
-    builder.Logging
-        .EnableEnrichment()
-        .AddJsonConsole(o => o.JsonWriterOptions = new System.Text.Json.JsonWriterOptions() { Indented = true });
-    builder.Services
-        .AddApplicationMetadata(md =>
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(resource => resource.AddService(
+            serviceName: builder.Environment.ApplicationName,
+            serviceVersion: applicationVersion,
+            serviceInstanceId: Environment.MachineName))
+        .WithMetrics(metricBuilder =>
         {
-            md.ApplicationName = nameof(Agave);
-            md.BuildVersion = "1.0.0";
-            md.EnvironmentName = builder.Environment.EnvironmentName;
-        
+            metricBuilder
+                .AddMeter("Microsoft.Orleans")
+                .AddHttpClientInstrumentation()
+                .AddConsoleExporter();
         })
-        .AddProcessLogEnricher(e => e.ProcessId = true)
-        .AddServiceLogEnricher(e =>
+        .WithTracing(tracingBuilder =>
         {
-            e.ApplicationName = true;
-            e.BuildVersion = true;
-            e.EnvironmentName = true;
+            tracingBuilder
+                .AddHttpClientInstrumentation()                
+                .AddSource("Microsoft.Orleans.Runtime")
+                .AddSource("Microsoft.Orleans.Application")
+                .AddConsoleExporter();
         });
-
+    builder.Logging.ClearProviders();
+    builder.Logging.AddOpenTelemetry(logging =>
+    {
+        var resourceBuilder = ResourceBuilder
+            .CreateDefault()
+            .AddService(builder.Environment.ApplicationName);
+        logging.SetResourceBuilder(resourceBuilder)
+            .AddConsoleExporter();
+    });
+    builder.Services.Configure<OpenTelemetryLoggerOptions>(options => options.IncludeScopes = true);
 }
 else
 {
@@ -54,7 +85,6 @@ else
 
     });
 }
-
 
 var host = builder.Build();
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
