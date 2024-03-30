@@ -11,10 +11,10 @@ if(builder.Environment.IsDevelopment())
         siloBuilder
             .UseLocalhostClustering()
             .AddMemoryGrainStorage("agave")
-            .AddMemoryGrainStorage("ActorEventHub")
+            // .AddMemoryGrainStorage("ActorEventHub")
             .UseInMemoryReminderService()
-
-            .AddStartupTask<GenesisSeeding>();
+            .AddStartupTask<GenesisSeeding>()
+            ;
     });
     builder.Logging
         .EnableEnrichment()

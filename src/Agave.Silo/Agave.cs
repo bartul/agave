@@ -1,28 +1,21 @@
+using Agave.OrleansExtensions;
 using Orleans.Timers;
 
 namespace Agave;
 
 
 [GrainType("agave")]
-public sealed class Agave : IAgave
+public sealed class Agave(
+    [PersistentState("agave_ecosystem_store", "agave")] IPersistentState<AgaveState> storage,
+    IGrainContext grainContext,
+    IReminderRegistry reminderRegistry,
+    ILogger<Agave> logger) : IAgave, IForcePersistance
 {
-    private readonly ILogger _logger;
-    private readonly IPersistentState<AgaveState> _storage;
-    private readonly IGrainContext _grainContext;
-    private readonly IReminderRegistry _reminderRegistry;
+    private readonly ILogger _logger = logger;
+    private readonly IPersistentState<AgaveState> _storage = storage;
+    private readonly IGrainContext _grainContext = grainContext;
+    private readonly IReminderRegistry _reminderRegistry = reminderRegistry;
     private readonly Random _random = new(DateTime.Now.Millisecond);
-
-    public Agave(
-        [PersistentState("agave_ecosystem_store", "agave")] IPersistentState<AgaveState> storage,
-        IGrainContext grainContext,
-        IReminderRegistry reminderRegistry,
-        ILogger<Agave> logger)
-    {
-        _storage = storage;
-        _grainContext = grainContext;
-        _reminderRegistry = reminderRegistry;
-        _logger = logger;
-    }
 
     async Task IAgave.Plant(PlantSeedCommand plantSeedCommand)
     {
@@ -38,8 +31,6 @@ public sealed class Agave : IAgave
             callingGrainId: _grainContext.GrainId,
             reminderName: nameof(TimeToGerminateArrived),
             dueTime: plantSeedCommand.TimeToGerminate);
-
-        await _storage.WriteStateAsync();
     }
 
     public async Task TimeToGerminateArrived()
@@ -66,26 +57,22 @@ public sealed class Agave : IAgave
             callingGrainId: _grainContext.GrainId,
             reminderName: nameof(TimeToBlossomArrived),
             dueTime: _storage.State.TimeToBlossom);
-
-        await _storage.WriteStateAsync();
     }
 
     public async Task TimeToBlossomArrived() => await Blossom();
 
-    public async Task Blossom()
+    public Task Blossom()
     {
         _storage.State.Current = AgaveBlossomState.Blossomed;
         _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
-
-        await _storage.WriteStateAsync();
+        return Task.CompletedTask;
     }
 
-    public async Task Die()
+    public Task Die()
     {
         _storage.State.Current = AgaveBlossomState.Dead;
         _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
-
-        await _storage.WriteStateAsync();
+        return Task.CompletedTask;
     }
 
     async Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
@@ -97,6 +84,12 @@ public sealed class Agave : IAgave
             case nameof(TimeToBlossomArrived): await TimeToBlossomArrived(); break;
         }
         await _reminderRegistry.UnregisterReminderByName(_grainContext.GrainId, reminderName);
+    }
+
+    public async Task WriteState()
+    {
+        _logger.StateSaved(_grainContext.GrainId, _storage.State);
+        await _storage.WriteStateAsync();
     }
 }
 
