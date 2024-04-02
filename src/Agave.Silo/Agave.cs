@@ -152,4 +152,3 @@ public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, dou
     [Id(3)]
     public TimeSpan TimeToBlossom { get; init; } = TimeToBlossom;
 }
-
