@@ -1,4 +1,5 @@
-using Agave.Silo
+using Agave.Silo;
+
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Environment.ApplicationName = builder.Configuration.GetValue("ServiceName", defaultValue: nameof(Agave))!;
