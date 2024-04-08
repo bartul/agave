@@ -1,23 +1,24 @@
 using Agave.Tests.TestExtensions;
 using Microsoft.Extensions.Logging;
+using Orleans.BroadcastChannel;
 using Orleans.Runtime;
+using Orleans.Streams;
 
 namespace Agave.Tests;
 
-public partial class AgaveTests
+public partial class AgaveTests(ITestOutputHelper output)
 {
-    private readonly ILogger<Agave> _logger;
-
-    public AgaveTests(ITestOutputHelper output)
-    {
-        _logger = new LoggerFactory([new XunitLoggerProvider(output)]).CreateLogger<Agave>();
-    }
+    private readonly ILogger<Agave> _logger = new LoggerFactory([new XunitLoggerProvider(output)]).CreateLogger<Agave>();
 
     [Fact]
     public async void WhenPlantCommandIsExecuted_ThenAgaveIsPlanted()
     {
         var state = new AgaveState();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), new TestReminderRegistry(), _logger);
+
+        var reminderRegistry = new TestReminderRegistry();
+        var serviceProvider = new TestServiceProvider(_logger);
+        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger));
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
 
         await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromSeconds(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10)));
 
@@ -28,9 +29,10 @@ public partial class AgaveTests
     public async void GivenPlanted_WhenTimeToGerminateExpires_ThenAgaveIsGerminatedOrDead()
     {
         var state = new AgaveState();
-
         var reminderRegistry = new TestReminderRegistry();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
+        var serviceProvider = new TestServiceProvider(_logger);
+        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger));
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10)));
@@ -46,7 +48,9 @@ public partial class AgaveTests
         var state = new AgaveState();
 
         var reminderRegistry = new TestReminderRegistry();
-        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
+        var serviceProvider = new TestServiceProvider(_logger);
+        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger));
+        IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromDays(10)));
@@ -57,7 +61,7 @@ public partial class AgaveTests
     }
 
     [Fact]
-    public async void GivenGerminated_WhenTimeToBlossomExpires_ThenAgaveIsBlossomed()
+    public async void GivenGerminated_WhenTimeToBlossomExpires_ThenAgaveIsBlossomed_AndSeedProducePublished()
     {
         var state = new AgaveState() { 
             Current = AgaveBlossomState.Planted, 
@@ -68,13 +72,17 @@ public partial class AgaveTests
         };
 
         var reminderRegistry = new TestReminderRegistry();
-        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
+        var publishedEvents = new List<object>();
+        var serviceProvider = new TestServiceProvider(_logger);
+        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger, item => publishedEvents.Add(item)));
+        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await (agave as IRemindable).ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Germinate();
         reminderRegistry.AdvanceTime(TimeSpan.FromDays(11));
 
         Assert.Equal(AgaveBlossomState.Blossomed, state.Current);
+        Assert.Contains(publishedEvents, item => item is SeedProduced);
     }
 
     [Fact]
@@ -89,7 +97,9 @@ public partial class AgaveTests
         };
 
         var reminderRegistry = new TestReminderRegistry();
-        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(), reminderRegistry, _logger);
+        var serviceProvider = new TestServiceProvider(_logger);
+        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger));
+        Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await (agave as IRemindable).ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
         await agave.Germinate();

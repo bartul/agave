@@ -1,5 +1,4 @@
 using Agave.OrleansExtensions;
-using Orleans.Timers;
 
 namespace Agave;
 
@@ -15,6 +14,7 @@ public sealed class Agave(
     private readonly IPersistentState<AgaveState> _storage = storage;
     private readonly IGrainContext _grainContext = grainContext;
     private readonly IReminderRegistry _reminderRegistry = reminderRegistry;
+    private readonly IBroadcastChannelProvider _broadcastChannelProvider = grainContext.ActivationServices.GetRequiredKeyedService<IBroadcastChannelProvider>("event-bus");
     private readonly Random _random = new(DateTime.Now.Millisecond);
 
     async Task IAgave.Plant(PlantSeedCommand plantSeedCommand)
@@ -65,6 +65,11 @@ public sealed class Agave(
     {
         _storage.State.Current = AgaveBlossomState.Blossomed;
         _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
+
+
+        _broadcastChannelProvider.GetChannelWriter<SeedProduced>(ChannelId.Create("event-bus", Guid.Empty))
+            .Publish(new SeedProduced());
+
         return Task.CompletedTask;
     }
 
@@ -151,4 +156,9 @@ public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, dou
     public double DegenerationRate { get; init; } = DegenerationRate;
     [Id(3)]
     public TimeSpan TimeToBlossom { get; init; } = TimeToBlossom;
+}
+[GenerateSerializer, Immutable]
+[Alias("Agave.SeedProduced")]
+public record SeedProduced()
+{
 }

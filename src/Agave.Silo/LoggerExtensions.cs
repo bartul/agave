@@ -13,5 +13,12 @@ internal static partial class LoggerExtensions
 
     [LoggerMessage(EventId = 1003, Level = LogLevel.Debug, Message = "Agave {grainId} state saved.")]
     public static partial void StateSaved(this ILogger logger, GrainId grainId, [LogProperties] AgaveState grainState);
+
+
+    [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Gardner {grainId} received seed produced event.")]
+    public static partial void ReceiveSeedProducedEvent(this ILogger logger, GrainId grainId);
+
+    [LoggerMessage(EventId = 2001, Level = LogLevel.Error, Message = "Gardner {grainId} experienced an error on receiving seed produced event.")]
+    public static partial void ErrorReceivingSeedProducedEvent(this ILogger logger, Exception ex, GrainId grainId);
 }
 

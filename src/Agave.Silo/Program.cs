@@ -5,9 +5,9 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Environment.ApplicationName = builder.Configuration.GetValue("ServiceName", defaultValue: nameof(Agave))!;
 var applicationVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
 
-var tracingExporter = builder.Configuration.GetValue("UseTracingExporter", defaultValue: "console")!.ToLowerInvariant();
-var metricsExporter = builder.Configuration.GetValue("UseMetricsExporter", defaultValue: "console")!.ToLowerInvariant();
-var logExporter = builder.Configuration.GetValue("UseLogExporter", defaultValue: "console")!.ToLowerInvariant();
+var tracingExporter = builder.Configuration.GetValue("UseTracingExporter", defaultValue: "none")!.ToLowerInvariant();
+var metricsExporter = builder.Configuration.GetValue("UseMetricsExporter", defaultValue: "none")!.ToLowerInvariant();
+var logExporter = builder.Configuration.GetValue("UseLogExporter", defaultValue: "none")!.ToLowerInvariant();
 
 builder.SetupOrleans();
 builder.SetupTelemetry(applicationVersion, tracingExporter, metricsExporter, logExporter);

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Orleans.Runtime;
 
 namespace Agave.Tests.TestExtensions;
@@ -5,6 +6,20 @@ namespace Agave.Tests.TestExtensions;
 internal class TestGrainContext<T> : IGrainContext
 {
     private readonly GrainId _grainId = GrainId.Create(typeof(T).Name, Guid.NewGuid().ToString());
+    
+    private readonly ILogger _logger;
+    private readonly TestServiceProvider _testServiceProvider;
+
+    public TestGrainContext(ILogger logger, TestServiceProvider testServiceProvider)
+    {
+        _logger = logger;
+        _testServiceProvider = testServiceProvider;
+    }
+    public TestGrainContext(ILogger logger)
+    {
+        _logger = logger;
+        _testServiceProvider = new TestServiceProvider(logger);
+    }
 
     public GrainReference GrainReference => throw new NotImplementedException();
 
@@ -16,7 +31,7 @@ internal class TestGrainContext<T> : IGrainContext
 
     public GrainAddress Address => throw new NotImplementedException();
 
-    public IServiceProvider ActivationServices => throw new NotImplementedException();
+    public IServiceProvider ActivationServices => _testServiceProvider;
 
     public IGrainLifecycle ObservableLifecycle => throw new NotImplementedException();
 
@@ -69,4 +84,3 @@ internal class TestGrainContext<T> : IGrainContext
         throw new NotImplementedException();
     }
 }
-

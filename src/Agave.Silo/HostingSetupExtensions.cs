@@ -18,6 +18,9 @@ public static class HostingSetupExtensions
                     .UseLocalhostClustering()
                     .AddMemoryGrainStorage("agave")
                     .UseInMemoryReminderService()
+                    .AddMemoryStreams("bus")
+                    .AddMemoryGrainStorage("PubSubStore")
+                    .AddBroadcastChannel("event-bus")
                     .AddStartupTask<GenesisSeeding>();
             });
         }
@@ -92,24 +95,24 @@ public static class HostingSetupExtensions
         return builder;
     }
 
-    public static TracerProviderBuilder AddTelemetryExporters(this TracerProviderBuilder builder, string tracingExporter)
+    public static TracerProviderBuilder AddTelemetryExporters(this TracerProviderBuilder builder, string tracingExporter) => tracingExporter switch
     {
-        return tracingExporter == "otlp"
-            ? builder.AddOtlpExporter()
-            : builder.AddConsoleExporter();
-    }
+        "otlp" => builder.AddOtlpExporter(),
+        "console" => builder.AddConsoleExporter(),
+        _ => builder
+    };
 
-    public static MeterProviderBuilder AddTelemetryExporters(this MeterProviderBuilder builder, string metricsExporter)
+    public static MeterProviderBuilder AddTelemetryExporters(this MeterProviderBuilder builder, string metricsExporter) => metricsExporter switch
     {
-        return metricsExporter == "otlp"
-            ? builder.AddOtlpExporter()
-            : builder.AddConsoleExporter();
-    }
+        "otlp" => builder.AddOtlpExporter(),
+        "console" => builder.AddConsoleExporter(),
+        _ => builder
+    };
 
-    public static OpenTelemetryLoggerOptions AddTelemetryExporters(this OpenTelemetryLoggerOptions builder, string logExporter)
+    public static OpenTelemetryLoggerOptions AddTelemetryExporters(this OpenTelemetryLoggerOptions builder, string logExporter) => logExporter switch
     {
-        return logExporter == "otlp"
-            ? builder.AddOtlpExporter()
-            : builder.AddConsoleExporter();
-    }
+        "otlp" => builder.AddOtlpExporter(),
+        "console" => builder.AddConsoleExporter(),
+        _ => builder
+    };
 }
