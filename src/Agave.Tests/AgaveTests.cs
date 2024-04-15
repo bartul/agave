@@ -11,7 +11,7 @@ public partial class AgaveTests(ITestOutputHelper output)
     private readonly ILogger<Agave> _logger = new LoggerFactory([new XunitLoggerProvider(output)]).CreateLogger<Agave>();
 
     [Fact]
-    public async void WhenPlantCommandIsExecuted_ThenAgaveIsPlanted()
+    public async void WhenPlanted_ThenAgaveIsPlanted()
     {
         var state = new AgaveState();
 
@@ -26,7 +26,7 @@ public partial class AgaveTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async void GivenPlanted_WhenTimeToGerminateExpires_ThenAgaveIsGerminatedOrDead()
+    public async void WhenPlantedAndTimeToGerminateExpires_ThenAgaveIsGerminatedOrDead()
     {
         var state = new AgaveState();
         var reminderRegistry = new TestReminderRegistry();
@@ -43,7 +43,7 @@ public partial class AgaveTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async void GivenPlanted_WhenTimeToGerminateHasNotPassed_ThenAgaveIsStillPlanted()
+    public async void WhenPlantedTimeToGerminateHasNotPassed_ThenAgaveIsStillPlanted()
     {
         var state = new AgaveState();
 
@@ -61,7 +61,7 @@ public partial class AgaveTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async void GivenGerminated_WhenTimeToBlossomExpires_ThenAgaveIsBlossomed_AndSeedProducePublished()
+    public async void GivenPlanted_WhenGerminatedAndWhenTimeToBlossomExpires_ThenAgaveIsBlossomed_AndSeedProducePublished()
     {
         var state = new AgaveState() { 
             Current = AgaveBlossomState.Planted, 
@@ -86,7 +86,7 @@ public partial class AgaveTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async void GivenGerminated_WhenTimeToBlossomHasNotPassed_ThenAgaveIsStillGerminated()
+    public async void GivenPlanted_WhenGerminatedAndTimeToBlossomHasNotPassed_ThenAgaveIsStillGerminated()
     {
         var state = new AgaveState() { 
             Current = AgaveBlossomState.Planted, 
