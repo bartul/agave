@@ -24,6 +24,7 @@ public sealed class Agave(
         _storage.State.SuccessRate = plantSeedCommand.SuccessRate;
         _storage.State.DegenerationRate = plantSeedCommand.DegenerationRate;
         _storage.State.TimeToBlossom = plantSeedCommand.TimeToBlossom;
+        _storage.State.NumberOfSeedsProducing = plantSeedCommand.NumberOfSeedsProducing;
 
         _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
 
@@ -35,16 +36,16 @@ public sealed class Agave(
 
     public async Task TimeToGerminateArrived()
     {
-        int decision = _random.Next(1, 3);
+        var decision = _random.Next(1, 100) <= _storage.State.SuccessRate * 100;
         _logger.AgaveGerminationDecision(_grainContext.GrainId, decision);
 
-        if (decision == 1)
+        if (decision)
         {
-            await Die();
+            await Germinate();
         }
         else
         {
-            await Germinate();
+            await Die();
         }
     }
 
@@ -61,16 +62,18 @@ public sealed class Agave(
 
     public async Task TimeToBlossomArrived() => await Blossom();
 
-    public Task Blossom()
+    public async Task Blossom()
     {
         _storage.State.Current = AgaveBlossomState.Blossomed;
         _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
 
 
-        _broadcastChannelProvider.GetChannelWriter<SeedProduced>(ChannelId.Create("event-bus", Guid.Empty))
-            .Publish(new SeedProduced());
-
-        return Task.CompletedTask;
+        var channelWriter = _broadcastChannelProvider.GetChannelWriter<SeedProduced>(ChannelId.Create("event-bus", Guid.Empty));
+        for (int i = 0; i < _storage.State.NumberOfSeedsProducing; i++)
+        { 
+            _logger.AgaveProducingSeed(_grainContext.GrainId, _storage.State);
+            await channelWriter.Publish(new SeedProduced(_storage.State.TimeToGerminate, _storage.State.SuccessRate - _storage.State.DegenerationRate, _storage.State.DegenerationRate, _storage.State.TimeToBlossom, _storage.State.NumberOfSeedsProducing));
+        }
     }
 
     public Task Die()
@@ -112,6 +115,8 @@ public record AgaveState()
     public double DegenerationRate { get; set; } = 0;
     [Id(4)]
     public TimeSpan TimeToBlossom { get; set; } = TimeSpan.Zero;
+    [Id(5)]
+    public int NumberOfSeedsProducing { get; set; } = 1;
 }
 
 [GenerateSerializer]
@@ -146,7 +151,7 @@ public interface IAgave : IGrainWithGuidKey, IRemindable
 
 [GenerateSerializer, Immutable]
 [Alias("Agave.PlantSeedCommand")]
-public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate, TimeSpan TimeToBlossom)
+public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate, TimeSpan TimeToBlossom, int NumberOfSeedsProducing)
 {
     [Id(0)]
     public TimeSpan TimeToGerminate { get; init; } = TimeToGerminate;
@@ -156,9 +161,22 @@ public record PlantSeedCommand(TimeSpan TimeToGerminate, double SuccessRate, dou
     public double DegenerationRate { get; init; } = DegenerationRate;
     [Id(3)]
     public TimeSpan TimeToBlossom { get; init; } = TimeToBlossom;
+    [Id(4)]
+    public int NumberOfSeedsProducing { get; init; } = NumberOfSeedsProducing;
 }
+
 [GenerateSerializer, Immutable]
 [Alias("Agave.SeedProduced")]
-public record SeedProduced()
+public record SeedProduced(TimeSpan TimeToGerminate, double SuccessRate, double DegenerationRate, TimeSpan TimeToBlossom, int NumberOfSeedsProducing)
 {
+    [Id(0)]
+    public TimeSpan TimeToGerminate { get; init; } = TimeToGerminate;
+    [Id(1)]
+    public double SuccessRate { get; init; } = SuccessRate;
+    [Id(2)]
+    public double DegenerationRate { get; init; } = DegenerationRate;
+    [Id(3)]
+    public TimeSpan TimeToBlossom { get; init; } = TimeToBlossom;
+    [Id(4)]
+    public int NumberOfSeedsProducing { get; init; } = NumberOfSeedsProducing;
 }

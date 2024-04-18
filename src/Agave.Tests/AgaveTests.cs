@@ -20,7 +20,7 @@ public partial class AgaveTests(ITestOutputHelper output)
         serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger));
         IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
 
-        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromSeconds(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10)));
+        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromSeconds(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10), NumberOfSeedsProducing: 2));
 
         Assert.Equal(AgaveBlossomState.Planted, state.Current);
     }
@@ -35,7 +35,7 @@ public partial class AgaveTests(ITestOutputHelper output)
         IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
-        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10)));
+        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromSeconds(10), NumberOfSeedsProducing: 2));
 
         reminderRegistry.AdvanceTime(TimeSpan.FromDays(6));
 
@@ -53,7 +53,7 @@ public partial class AgaveTests(ITestOutputHelper output)
         IAgave agave = new Agave(new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await agave.ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
-        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromDays(10)));
+        await agave.Plant(new PlantSeedCommand(TimeToGerminate: TimeSpan.FromDays(5), SuccessRate: 1, DegenerationRate: 0.1, TimeToBlossom: TimeSpan.FromDays(10), NumberOfSeedsProducing: 2));
 
         reminderRegistry.AdvanceTime(TimeSpan.FromDays(2));
 
@@ -68,13 +68,14 @@ public partial class AgaveTests(ITestOutputHelper output)
             TimeToGerminate = TimeSpan.FromDays(5), 
             SuccessRate = 1,
             DegenerationRate = 0.1,
-            TimeToBlossom = TimeSpan.FromDays(10) 
+            TimeToBlossom = TimeSpan.FromDays(10),
+            NumberOfSeedsProducing = 2
         };
 
         var reminderRegistry = new TestReminderRegistry();
         var publishedEvents = new List<object>();
         var serviceProvider = new TestServiceProvider(_logger);
-        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger, item => publishedEvents.Add(item)));
+        serviceProvider.AddKeyedService<IBroadcastChannelProvider>("event-bus", new TestBroadcastChannelProvider(_logger, publishedEvents.Add));
         Agave agave = new (new TestPersistentState<AgaveState>(state), new TestGrainContext<Agave>(_logger, serviceProvider), reminderRegistry, _logger);
         reminderRegistry.ReminderTicked += async (_, reminder) => await (agave as IRemindable).ReceiveReminder(reminder.ReminderName, new TickStatus(reminder.FirstTick, reminder.Period, reminder.NextTick));
 
@@ -82,7 +83,22 @@ public partial class AgaveTests(ITestOutputHelper output)
         reminderRegistry.AdvanceTime(TimeSpan.FromDays(11));
 
         Assert.Equal(AgaveBlossomState.Blossomed, state.Current);
-        Assert.Contains(publishedEvents, item => item is SeedProduced);
+        Assert.Equal(publishedEvents.OfType<SeedProduced>().Count(), state.NumberOfSeedsProducing);
+        Assert.Collection(publishedEvents.OfType<SeedProduced>(),
+            seed => {
+                Assert.Equal(TimeSpan.FromDays(5), seed.TimeToGerminate);
+                Assert.Equal(0.9, seed.SuccessRate);
+                Assert.Equal(0.1, seed.DegenerationRate);
+                Assert.Equal(TimeSpan.FromDays(10), seed.TimeToBlossom);
+                Assert.Equal(2, seed.NumberOfSeedsProducing);
+            },
+            seed => {
+                Assert.Equal(TimeSpan.FromDays(5), seed.TimeToGerminate);
+                Assert.Equal(0.9, seed.SuccessRate);
+                Assert.Equal(0.1, seed.DegenerationRate);
+                Assert.Equal(TimeSpan.FromDays(10), seed.TimeToBlossom);
+                Assert.Equal(2, seed.NumberOfSeedsProducing);
+            });
     }
 
     [Fact]
