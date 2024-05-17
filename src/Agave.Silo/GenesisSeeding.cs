@@ -11,7 +11,7 @@ internal class GenesisSeeding(IGrainFactory grainFactory, ILoggerFactory loggerF
         await _grainFactory.GetGrain<IAgave>(Guid.NewGuid()).Plant(new PlantSeedCommand(
             TimeToGerminate: TimeSpan.FromSeconds(5), 
             SuccessRate: 1, 
-            DegenerationRate: 0.1,
+            DegenerationRate: 0.3,
             TimeToBlossom: TimeSpan.FromSeconds(5),
             NumberOfSeedsProducing: 3));
     }

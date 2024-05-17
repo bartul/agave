@@ -2,7 +2,7 @@ namespace Agave;
 
 internal static partial class LoggerExtensions
 {
-    [LoggerMessage(EventId = 1000, Level = LogLevel.Information, Message = "Agave {grainId} is deciding to germinate or die. Decision: {decision}.")]
+    [LoggerMessage(EventId = 1000, Level = LogLevel.Information, Message = "Agave {grainId} is deciding to germinate. Decision: {decision}.")]
     public static partial void AgaveGerminationDecision(this ILogger logger, GrainId grainId, bool decision);
 
     [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Agave {grainId} blossoming state - {state}.")]

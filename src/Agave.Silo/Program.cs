@@ -9,6 +9,7 @@ var tracingExporter = builder.Configuration.GetValue("UseTracingExporter", defau
 var metricsExporter = builder.Configuration.GetValue("UseMetricsExporter", defaultValue: "none")!.ToLowerInvariant();
 var logExporter = builder.Configuration.GetValue("UseLogExporter", defaultValue: "none")!.ToLowerInvariant();
 
+
 builder.SetupOrleans();
 builder.SetupTelemetry(applicationVersion, tracingExporter, metricsExporter, logExporter);
 
@@ -16,5 +17,8 @@ var host = builder.Build();
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Starting Agave Silo");
+logger.LogInformation("Log exporter: {LogExporter}", logExporter);
+logger.LogInformation("Metrics exporter: {MetricsExporter}", metricsExporter);
+logger.LogInformation("Tracing exporter: {TracingExporter}", tracingExporter);
 
 host.Run();
