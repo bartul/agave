@@ -11,15 +11,12 @@ processors:
       - key: loki.attribute.labels
         action: insert
         value: deployment.environment, telemetry.sdk.language, grainId, service.version
-  # transform/drop_unneeded_resource_attributes:
-  #   error_mode: ignore
-  #   log_statements:
-  #     - context: resource
-  #       statements:
-  #         # - delete_key(attributes, "{OriginalFormat}")
-  #         - delete_key(attributes, "process.pid")
-  #         - delete_key(attributes, "attributes.process.pid")
-  #         - delete_key(attributes, "resources.telemetry.sdk.name")
+  transform/drop_unneeded_resource_attributes:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - delete_key(attributes, "{OriginalFormat}")
 exporters:
   otlp/trace:
     endpoint: http://tempo:4317
@@ -42,6 +39,5 @@ service:
       exporters: [otlp/trace, debug]
     logs:
       receivers: [otlp]
-      processors: [attributes]
-      # processors: [transform/drop_unneeded_resource_attributes, attributes]
+      processors: [attributes, transform/drop_unneeded_resource_attributes]
       exporters: [loki]

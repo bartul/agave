@@ -1,4 +1,3 @@
-using Agave.Silo;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Trace;
@@ -21,6 +20,7 @@ public static class HostingSetupExtensions
                     .AddMemoryStreams("bus")
                     .AddMemoryGrainStorage("PubSubStore")
                     .AddBroadcastChannel("event-bus")
+                    .AddActivityPropagation()
                     .AddStartupTask<GenesisSeeding>();
             });
         }
@@ -39,6 +39,8 @@ public static class HostingSetupExtensions
                 siloBuilder
                     .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
                     .AddCosmosGrainStorage("agave_ecosystem_store", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString));
+
+                siloBuilder.AddActivityPropagation();
             });
 
         }
@@ -54,18 +56,25 @@ public static class HostingSetupExtensions
                 md.BuildVersion = applicationVersion;
                 md.EnvironmentName = builder.Environment.EnvironmentName;
             })
-            .AddProcessLogEnricher(e => e.ProcessId = true)
+            .AddProcessLogEnricher(e =>
+            {
+                e.ProcessId = true;
+                e.ThreadId = true;
+            })
             .AddServiceLogEnricher(e =>
             {
                 e.ApplicationName = true;
                 e.BuildVersion = true;
                 e.EnvironmentName = true;
             });
-        builder.Logging.EnableEnrichment();
+        builder.Logging
+            .ClearProviders()
+            .EnableEnrichment();
 
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(
                 serviceName: builder.Environment.ApplicationName,
+                serviceNamespace: "agave",
                 serviceVersion: applicationVersion,
                 serviceInstanceId: Environment.MachineName))
             .WithMetrics(metricBuilder =>
