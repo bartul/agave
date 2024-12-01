@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-Agave.Silo-6681982d-f69f-4935-aa8e-0b83fb1fb006</UserSecretsId>
@@ -10,19 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Orleans.BroadcastChannel" Version="8.1.0" />
-    <PackageReference Include="Microsoft.Orleans.Clustering.Cosmos" Version="8.1.0" />
-    <PackageReference Include="Microsoft.Orleans.Persistence.Cosmos" Version="8.1.0" />
-    <PackageReference Include="Microsoft.Orleans.Reminders" Version="8.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Orleans.BroadcastChannel" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.Cosmos" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.Cosmos" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.1.0" />
-    <PackageReference Include="Microsoft.Orleans.Streaming.EventHubs" Version="8.1.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.8.0" />
+    <PackageReference Include="Microsoft.Orleans.Streaming" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Streaming.EventHubs" Version="9.0.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.0" />
   </ItemGroup>
 </Project>

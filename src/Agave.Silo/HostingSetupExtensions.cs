@@ -72,11 +72,13 @@ public static class HostingSetupExtensions
             .EnableEnrichment();
 
         builder.Services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(
-                serviceName: builder.Environment.ApplicationName,
-                serviceNamespace: "agave",
-                serviceVersion: applicationVersion,
-                serviceInstanceId: Environment.MachineName))
+            .ConfigureResource(resource => resource
+                .AddService(
+                    serviceName: builder.Environment.ApplicationName,
+                    serviceNamespace: "agave",
+                    serviceVersion: applicationVersion,
+                    serviceInstanceId: Environment.MachineName)
+                .AddAttributes([new("environment", builder.Environment.EnvironmentName)]))
             .WithMetrics(metricBuilder =>
             {
                 metricBuilder
