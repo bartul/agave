@@ -79,7 +79,7 @@ internal class TestGrainContext<T> : IGrainContext
         throw new NotImplementedException();
     }
 
-    public void SetComponent<TComponent>(TComponent value) where TComponent : class
+    public void SetComponent<TComponent>(TComponent? value) where TComponent : class
     {
         throw new NotImplementedException();
     }
