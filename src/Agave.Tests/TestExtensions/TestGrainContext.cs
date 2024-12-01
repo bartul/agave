@@ -83,4 +83,19 @@ internal class TestGrainContext<T> : IGrainContext
     {
         throw new NotImplementedException();
     }
+
+    public void Activate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Deactivate(DeactivationReason deactivationReason, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Migrate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
