@@ -11,7 +11,7 @@ var logExporter = builder.Configuration.GetValue("UseLogExporter", defaultValue:
 
 
 builder.SetupOrleans();
-builder.SetupTelemetry(applicationVersion, tracingExporter, metricsExporter, logExporter);
+// builder.SetupTelemetry(applicationVersion, tracingExporter, metricsExporter, logExporter);
 
 var host = builder.Build();
 

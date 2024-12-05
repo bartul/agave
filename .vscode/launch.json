@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Agave.Silo/bin/Debug/net8.0/Agave.Silo.dll",
+            "program": "${workspaceFolder}/src/Agave.Silo.Host/bin/Debug/net9.0/Agave.Silo.Host.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Agave.Silo",
+            "cwd": "${workspaceFolder}/src/Agave.Silo.Host",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false
@@ -23,4 +23,4 @@
             "request": "attach"
         }
     ]
-}
+} 

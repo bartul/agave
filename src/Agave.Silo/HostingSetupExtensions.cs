@@ -9,19 +9,21 @@ public static class HostingSetupExtensions
 {
     public static HostApplicationBuilder SetupOrleans(this HostApplicationBuilder builder)
     {
+        builder.UseOrleans((siloBuilder) =>
+        {
+            siloBuilder
+                .UseLocalhostClustering()
+                // .UseAzureStorageClustering(options => options.TableServiceClient = new Azure.Data.Tables.TableServiceClient("connectionString"))
+
+                .AddMemoryGrainStorage("agave")
+                .UseInMemoryReminderService()
+                .AddMemoryGrainStorage("PubSubStore")
+                .AddBroadcastChannel("event-bus")
+                .AddActivityPropagation()
+                .AddStartupTask<GenesisSeeding>();
+        });
         if (builder.Environment.IsDevelopment())
         {
-            builder.UseOrleans((siloBuilder) =>
-            {
-                siloBuilder
-                    .UseLocalhostClustering()
-                    .AddMemoryGrainStorage("agave")
-                    .UseInMemoryReminderService()
-                    .AddMemoryGrainStorage("PubSubStore")
-                    .AddBroadcastChannel("event-bus")
-                    .AddActivityPropagation()
-                    .AddStartupTask<GenesisSeeding>();
-            });
         }
         else
         {

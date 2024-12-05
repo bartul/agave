@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agave.Silo", "src\Agave.Sil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agave.Tests", "src\Agave.Tests\Agave.Tests.csproj", "{6531B2B8-CC3F-4FDF-B95B-425FDB09ED94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agave.Silo.Host", "src\Agave.Silo.Host\Agave.Silo.Host.csproj", "{3CC94E41-FF3D-4C99-9D7B-5E0D7DF3FC3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agave.Silo.ServiceDefaults", "src\Agave.Silo.ServiceDefaults\Agave.Silo.ServiceDefaults.csproj", "{9321C0DC-3DB5-4FFD-85BA-29ED35AA88F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +30,14 @@ Global
 		{6531B2B8-CC3F-4FDF-B95B-425FDB09ED94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6531B2B8-CC3F-4FDF-B95B-425FDB09ED94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6531B2B8-CC3F-4FDF-B95B-425FDB09ED94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CC94E41-FF3D-4C99-9D7B-5E0D7DF3FC3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CC94E41-FF3D-4C99-9D7B-5E0D7DF3FC3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CC94E41-FF3D-4C99-9D7B-5E0D7DF3FC3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CC94E41-FF3D-4C99-9D7B-5E0D7DF3FC3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9321C0DC-3DB5-4FFD-85BA-29ED35AA88F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9321C0DC-3DB5-4FFD-85BA-29ED35AA88F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9321C0DC-3DB5-4FFD-85BA-29ED35AA88F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9321C0DC-3DB5-4FFD-85BA-29ED35AA88F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{843A1CB5-05CB-4FCC-89E7-8095AAEE83A4} = {ADE307DC-5AEC-4E39-BB32-FD62C6FF01A5}

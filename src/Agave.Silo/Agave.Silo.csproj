@@ -28,4 +28,8 @@
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Agave.Silo.ServiceDefaults/Agave.Silo.ServiceDefaults.csproj" />
+  </ItemGroup>
 </Project>
