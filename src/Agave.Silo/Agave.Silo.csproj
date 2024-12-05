@@ -14,9 +14,12 @@
     <PackageReference Include="Microsoft.Extensions.Telemetry" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Orleans.BroadcastChannel" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Cosmos" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.AzureStorage" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Persistence.Cosmos" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Reminders" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Reminders.AzureStorage" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="9.0.1" />
     <PackageReference Include="Microsoft.Orleans.Streaming.EventHubs" Version="9.0.1" />

@@ -1,8 +1,6 @@
 using Agave.Tests.TestExtensions;
 using Microsoft.Extensions.Logging;
 using Orleans.BroadcastChannel;
-using Orleans.Runtime;
-using Orleans.Streams;
 
 namespace Agave.Tests;
 

@@ -17,7 +17,6 @@ public static class HostingSetupExtensions
                     .UseLocalhostClustering()
                     .AddMemoryGrainStorage("agave")
                     .UseInMemoryReminderService()
-                    .AddMemoryStreams("bus")
                     .AddMemoryGrainStorage("PubSubStore")
                     .AddBroadcastChannel("event-bus")
                     .AddActivityPropagation()
@@ -28,7 +27,8 @@ public static class HostingSetupExtensions
         {
             builder.UseOrleans(siloBuilder =>
             {
-                var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_COSMOS_DB_CONNECTION_STRING") ?? "";
+                // var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_COSMOS_DB_CONNECTION_STRING") ?? "";
+                var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_TABLES_CONNECTION_STRING") ?? "";
 
                 siloBuilder.Configure<ClusterOptions>(options =>
                 {
@@ -37,10 +37,18 @@ public static class HostingSetupExtensions
                 });
 
                 siloBuilder
-                    .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
-                    .AddCosmosGrainStorage("agave_ecosystem_store", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString));
+                    .UseAzureStorageClustering(options => options.TableServiceClient = new Azure.Data.Tables.TableServiceClient(connectionString))
+                    .UseAzureTableReminderService(connectionString)
+                    .AddAzureTableGrainStorage("agave", options => options.TableServiceClient = new Azure.Data.Tables.TableServiceClient(connectionString));
 
-                siloBuilder.AddActivityPropagation();
+                // siloBuilder
+                //     .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
+                //     .AddCosmosGrainStorage("agave_ecosystem_store", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString));
+
+                siloBuilder
+                    .AddBroadcastChannel("event-bus")
+                    .AddActivityPropagation()
+                    .AddStartupTask<GenesisSeeding>();
             });
 
         }
