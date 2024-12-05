@@ -15,13 +15,13 @@ public sealed class Gardner(
     {
         return streamSubscription.Attach<SeedProduced>(e => {
             _logger.ReceiveSeedProducedEvent(_grainContext.GrainId);
-            _grainFactory.GetGrain<IAgave>(Guid.NewGuid()).Plant(new PlantSeedCommand(
-                TimeToGerminate: e.TimeToGerminate, 
-                SuccessRate: e.SuccessRate, 
-                DegenerationRate: e.DegenerationRate,
-                TimeToBlossom: e.TimeToBlossom,
-                NumberOfSeedsProducing: e.NumberOfSeedsProducing));
-            return Task.CompletedTask;
+            return _grainFactory.GetGrain<IAgave>(Guid.NewGuid())
+                .Plant(new PlantSeedCommand(
+                    TimeToGerminate: e.TimeToGerminate, 
+                    SuccessRate: e.SuccessRate, 
+                    DegenerationRate: e.DegenerationRate,
+                    TimeToBlossom: e.TimeToBlossom,
+                    NumberOfSeedsProducing: e.NumberOfSeedsProducing));
         }, error => {
             _logger.ErrorReceivingSeedProducedEvent(error, _grainContext.GrainId);
             return Task.CompletedTask;

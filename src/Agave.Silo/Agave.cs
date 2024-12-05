@@ -8,7 +8,7 @@ public sealed class Agave(
     [PersistentState("agave_ecosystem_store", "agave")] IPersistentState<AgaveState> storage,
     IGrainContext grainContext,
     IReminderRegistry reminderRegistry,
-    ILogger<Agave> logger) : IAgave, IForcePersistance
+    ILogger<Agave> logger) : IAgave, IForcePersistence
 {
     private readonly ILogger _logger = logger;
     private readonly IPersistentState<AgaveState> _storage = storage;

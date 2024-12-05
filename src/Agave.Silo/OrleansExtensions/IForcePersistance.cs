@@ -3,7 +3,7 @@ using Orleans.Concurrency;
 
 namespace Agave.OrleansExtensions;
 
-public interface IForcePersistance : IIncomingGrainCallFilter
+public interface IForcePersistence : IIncomingGrainCallFilter
 {
     async Task IIncomingGrainCallFilter.Invoke(IIncomingGrainCallContext context)
     {
