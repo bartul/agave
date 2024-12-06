@@ -3,47 +3,31 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 
+
 namespace Agave.Silo;
 
 public static class HostingSetupExtensions
 {
     public static HostApplicationBuilder SetupOrleans(this HostApplicationBuilder builder)
     {
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.UseOrleans((siloBuilder) =>
-            {
-                siloBuilder
-                    .UseLocalhostClustering()
-                    .AddMemoryGrainStorage("agave")
-                    .UseInMemoryReminderService()
-                    .AddMemoryStreams("bus")
-                    .AddMemoryGrainStorage("PubSubStore")
-                    .AddBroadcastChannel("event-bus")
-                    .AddActivityPropagation()
-                    .AddStartupTask<GenesisSeeding>();
-            });
-        }
-        else
-        {
-            builder.UseOrleans(siloBuilder =>
-            {
-                var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_COSMOS_DB_CONNECTION_STRING") ?? "";
+        var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_TABLES_CONNECTION_STRING") ?? "";
+        builder.AddKeyedAzureTableClient("agave-clustering");
+        builder.AddKeyedAzureTableClient("agave-grain-state");
+        builder.AddKeyedAzureTableClient("agave-reminders");
 
-                siloBuilder.Configure<ClusterOptions>(options =>
+        builder.UseOrleans((siloBuilder) =>
+        {
+            siloBuilder
+                .AddBroadcastChannel("event-bus")
+                .AddActivityPropagation()
+                .AddStartupTask<GenesisSeeding>()
+
+                .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "AgaveCuster";
                     options.ServiceId = "Agave";
                 });
-
-                siloBuilder
-                    .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
-                    .AddCosmosGrainStorage("agave_ecosystem_store", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString));
-
-                siloBuilder.AddActivityPropagation();
-            });
-
-        }
+        });
         return builder;
     }
 
