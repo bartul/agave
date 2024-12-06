@@ -59,7 +59,7 @@ public partial class AgaveTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task GivenPlanted_WhenGerminatedAndWhenTimeToBlossomExpires_ThenAgaveIsBlossomed_AndSeedProducePublished()
+    public async Task GivenPlanted_WhenGerminatedAndWhenTimeToBlossomExpires_ThenAgaveIsDead_AndSeedProducePublished()
     {
         var state = new AgaveState() { 
             Current = AgaveBlossomState.Planted, 
@@ -80,7 +80,7 @@ public partial class AgaveTests(ITestOutputHelper output)
         await agave.Germinate();
         reminderRegistry.AdvanceTime(TimeSpan.FromDays(11));
 
-        Assert.Equal(AgaveBlossomState.Blossomed, state.Current);
+        Assert.Equal(AgaveBlossomState.Dead, state.Current);
         Assert.Equal(publishedEvents.OfType<SeedProduced>().Count(), state.NumberOfSeedsProducing);
         Assert.Collection(publishedEvents.OfType<SeedProduced>(),
             seed => {

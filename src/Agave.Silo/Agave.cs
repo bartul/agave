@@ -64,16 +64,15 @@ public sealed class Agave(
 
     public async Task Blossom()
     {
-        _storage.State.Current = AgaveBlossomState.Blossomed;
-        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
-
-
         var channelWriter = _broadcastChannelProvider.GetChannelWriter<SeedProduced>(ChannelId.Create("event-bus", Guid.Empty));
         for (int i = 0; i < _storage.State.NumberOfSeedsProducing; i++)
         { 
             _logger.AgaveProducingSeed(_grainContext.GrainId, _storage.State);
             await channelWriter.Publish(new SeedProduced(_storage.State.TimeToGerminate, _storage.State.SuccessRate - _storage.State.DegenerationRate, _storage.State.DegenerationRate, _storage.State.TimeToBlossom, _storage.State.NumberOfSeedsProducing));
         }
+
+        _storage.State.Current = AgaveBlossomState.Dead;
+        _logger.AgaveBlossomingState(_grainContext.GrainId, _storage.State.Current, _storage.State);
     }
 
     public Task Die()
