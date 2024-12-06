@@ -3,57 +3,31 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 
+
 namespace Agave.Silo;
 
 public static class HostingSetupExtensions
 {
     public static HostApplicationBuilder SetupOrleans(this HostApplicationBuilder builder)
     {
+        var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_TABLES_CONNECTION_STRING") ?? "";
+        builder.AddKeyedAzureTableClient("agave-clustering");
+        builder.AddKeyedAzureTableClient("agave-grain-state");
+        builder.AddKeyedAzureTableClient("agave-reminders");
+
         builder.UseOrleans((siloBuilder) =>
         {
             siloBuilder
-                .UseLocalhostClustering()
-                // .UseAzureStorageClustering(options => options.TableServiceClient = new Azure.Data.Tables.TableServiceClient("connectionString"))
-
-                .AddMemoryGrainStorage("agave")
-                .UseInMemoryReminderService()
-                .AddMemoryGrainStorage("PubSubStore")
                 .AddBroadcastChannel("event-bus")
                 .AddActivityPropagation()
-                .AddStartupTask<GenesisSeeding>();
-        });
-        if (builder.Environment.IsDevelopment())
-        {
-        }
-        else
-        {
-            builder.UseOrleans(siloBuilder =>
-            {
-                // var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_COSMOS_DB_CONNECTION_STRING") ?? "";
-                var connectionString = builder.Configuration.GetValue<string>("ORLEANS_AZURE_TABLES_CONNECTION_STRING") ?? "";
+                .AddStartupTask<GenesisSeeding>()
 
-                siloBuilder.Configure<ClusterOptions>(options =>
+                .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "AgaveCuster";
                     options.ServiceId = "Agave";
                 });
-
-                siloBuilder
-                    .UseAzureStorageClustering(options => options.TableServiceClient = new Azure.Data.Tables.TableServiceClient(connectionString))
-                    .UseAzureTableReminderService(connectionString)
-                    .AddAzureTableGrainStorage("agave", options => options.TableServiceClient = new Azure.Data.Tables.TableServiceClient(connectionString));
-
-                // siloBuilder
-                //     .UseCosmosClustering(cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString))
-                //     .AddCosmosGrainStorage("agave_ecosystem_store", cosmosOptions => cosmosOptions.ConfigureCosmosClient(connectionString));
-
-                siloBuilder
-                    .AddBroadcastChannel("event-bus")
-                    .AddActivityPropagation()
-                    .AddStartupTask<GenesisSeeding>();
-            });
-
-        }
+        });
         return builder;
     }
 
