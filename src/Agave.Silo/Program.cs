@@ -2,23 +2,36 @@ using Agave.Silo;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Environment.ApplicationName = builder.Configuration.GetValue("ServiceName", defaultValue: nameof(Agave))!;
-var applicationVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
+builder.Environment.ApplicationName = "agave-silo";
 
-var tracingExporter = builder.Configuration.GetValue("UseTracingExporter", defaultValue: "none")!.ToLowerInvariant();
-var metricsExporter = builder.Configuration.GetValue("UseMetricsExporter", defaultValue: "none")!.ToLowerInvariant();
-var logExporter = builder.Configuration.GetValue("UseLogExporter", defaultValue: "none")!.ToLowerInvariant();
+builder.Services.AddApplicationMetadata(md => 
+    md.BuildVersion = builder.Environment.IsDevelopment()
+                         ? "0.0.1-dev-box"
+                         : typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown"
+);
+builder.AddServiceDefaults();
 
+builder.AddKeyedAzureTableClient("agave-clustering");
+builder.AddKeyedAzureTableClient("agave-grain-state");
+builder.AddKeyedAzureTableClient("agave-reminders");
 
-builder.SetupOrleans();
-builder.SetupTelemetry(applicationVersion, tracingExporter, metricsExporter, logExporter);
+builder.UseOrleans((siloBuilder) =>
+{
+    siloBuilder
+        .AddBroadcastChannel("event-bus")
+        .AddActivityPropagation()
+        .AddStartupTask<GenesisSeeding>()
+
+        .Configure<ClusterOptions>(options =>
+        {
+            options.ClusterId = "agave-cluster";
+            options.ServiceId = "agave";
+        });
+});
 
 var host = builder.Build();
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
-logger.LogInformation("Starting Agave Silo");
-logger.LogInformation("Log exporter: {LogExporter}", logExporter);
-logger.LogInformation("Metrics exporter: {MetricsExporter}", metricsExporter);
-logger.LogInformation("Tracing exporter: {TracingExporter}", tracingExporter);
+logger.LogInformation("Starting agave silo...");
 
 host.Run();

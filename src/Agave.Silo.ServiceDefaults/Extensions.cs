@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Microsoft.Extensions.Hosting;
@@ -43,13 +44,40 @@ public static class Extensions
 
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        builder.Logging.AddOpenTelemetry(logging =>
-        {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-        });
+        builder.Services
+            .AddApplicationMetadata(md =>
+            {
+                md.ApplicationName = builder.Environment.ApplicationName;
+                md.EnvironmentName = builder.Environment.EnvironmentName;
+            })
+            .AddProcessLogEnricher(e =>{
+                e.ProcessId = true;
+                e.ThreadId = true;
+            })
+            .AddServiceLogEnricher(e => {
+                e.ApplicationName = true;
+                e.BuildVersion = true;
+                e.EnvironmentName = true;
+            });
+        builder.Logging
+            .EnableEnrichment(e => {
+                e.IncludeExceptionMessage = true;
+                e.CaptureStackTraces = true;
+                e.MaxStackTraceLength = 2048;
+                e.UseFileInfoForStackTraces = true;
+            })
+            .AddOpenTelemetry(logging =>
+            {
+                logging.IncludeFormattedMessage = true;
+                logging.IncludeScopes = true;
+            });
 
         builder.Services.AddOpenTelemetry()
+            // .ConfigureResource(resource => resource
+            //     .AddService(
+            //         serviceName: builder.Environment.ApplicationName,
+            //         serviceVersion: builder.Environment. "0.0.1")
+            //     .AddAttributes([new("deployment.environment", builder.Environment.EnvironmentName)]))
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
