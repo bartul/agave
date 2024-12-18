@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Microsoft.Extensions.Hosting;
@@ -16,7 +14,7 @@ namespace Microsoft.Extensions.Hosting;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
-    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder, string version = "0.0.0.0") where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
 
@@ -73,11 +71,6 @@ public static class Extensions
             });
 
         builder.Services.AddOpenTelemetry()
-            // .ConfigureResource(resource => resource
-            //     .AddService(
-            //         serviceName: builder.Environment.ApplicationName,
-            //         serviceVersion: builder.Environment. "0.0.1")
-            //     .AddAttributes([new("deployment.environment", builder.Environment.EnvironmentName)]))
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
