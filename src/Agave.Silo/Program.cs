@@ -1,3 +1,4 @@
+using System.Reflection;
 using Agave.Silo;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -5,12 +6,10 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Environment.ApplicationName = "agave-silo";
 
 builder.Services.AddApplicationMetadata(md => 
-    md.BuildVersion = builder.Environment.IsDevelopment()
-                         ? "0.0.1-dev-box"
-                         : typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown"
+    md.BuildVersion = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown"
 );
-builder.AddServiceDefaults();
 
+builder.AddServiceDefaults();
 builder.AddKeyedAzureTableClient("agave-clustering");
 builder.AddKeyedAzureTableClient("agave-grain-state");
 builder.AddKeyedAzureTableClient("agave-reminders");
@@ -29,9 +28,4 @@ builder.UseOrleans((siloBuilder) =>
         });
 });
 
-var host = builder.Build();
-
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
-logger.LogInformation("Starting agave silo...");
-
-host.Run();
+builder.Build().Run();
