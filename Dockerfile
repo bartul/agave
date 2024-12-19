@@ -1,18 +1,26 @@
-# Use the official image as a parent image.
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
-# Set the working directory.
-WORKDIR /app
+# Set the working directory
+WORKDIR /src
 
-# Copy the file or set of files in your Docker host’s current directory.
+# Copy the project files
 COPY . ./
 
-RUN ls -al
-# Restore the dependencies in a separate layer, this will speed up build times
+# Restore the dependencies
 RUN dotnet restore
 
-# Build the app
-RUN dotnet publish -c Release -o out
+# Build and publish the app
+RUN dotnet publish -c Release -o /app/out
+
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the published app from the build stage
+COPY --from=build /app/out .
 
 # Run the app on container startup
-CMD ["dotnet", "out/Agave.Silo.dll"]
+CMD ["dotnet", "Agave.Silo.Host.dll"]
