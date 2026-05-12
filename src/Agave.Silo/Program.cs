@@ -10,9 +10,9 @@ builder.Services.AddApplicationMetadata(md =>
 );
 
 builder.AddServiceDefaults();
-builder.AddKeyedAzureTableClient("agave-clustering");
-builder.AddKeyedAzureTableClient("agave-grain-state");
-builder.AddKeyedAzureTableClient("agave-reminders");
+builder.AddKeyedAzureTableServiceClient("agave-clustering");
+builder.AddKeyedAzureTableServiceClient("agave-grain-state");
+builder.AddKeyedAzureTableServiceClient("agave-reminders");
 
 builder.UseOrleans((siloBuilder) =>
 {

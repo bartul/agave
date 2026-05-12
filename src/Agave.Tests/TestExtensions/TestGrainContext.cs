@@ -22,6 +22,11 @@ internal class TestGrainContext<T> : IGrainContext
 
     public GrainReference GrainReference => throw new NotImplementedException();
 
+    public object GetTarget()
+    {
+        throw new NotImplementedException();
+    }
+
     public GrainId GrainId => _grainId;
 
     public object GrainInstance => throw new NotImplementedException();
@@ -54,6 +59,11 @@ internal class TestGrainContext<T> : IGrainContext
     }
 
     public TComponent GetComponent<TComponent>() where TComponent : class
+    {
+        throw new NotImplementedException();
+    }
+
+    public object? GetComponent(Type componentType)
     {
         throw new NotImplementedException();
     }
