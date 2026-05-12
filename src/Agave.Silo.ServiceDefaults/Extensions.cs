@@ -52,7 +52,7 @@ public static class Extensions
                 e.ProcessId = true;
                 e.ThreadId = true;
             })
-            .AddServiceLogEnricher(e => {
+            .AddApplicationLogEnricher(e => {
                 e.ApplicationName = true;
                 e.BuildVersion = true;
                 e.EnvironmentName = true;
