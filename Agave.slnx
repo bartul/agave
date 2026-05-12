@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Agave.Silo/Agave.Silo.csproj" />
+    <Project Path="src/Agave.Tests/Agave.Tests.csproj" />
+  </Folder>
+  <Project Path="src/Agave.Silo.Host/Agave.Silo.Host.csproj" />
+  <Project Path="src/Agave.Silo.ServiceDefaults/Agave.Silo.ServiceDefaults.csproj" />
+</Solution>
