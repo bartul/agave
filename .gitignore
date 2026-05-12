@@ -400,3 +400,4 @@ FodyWeavers.xsd
 **/.DS_Store
 
 dev/tempo-data
+.azure
