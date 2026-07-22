@@ -13,8 +13,8 @@
     <PackageReference Include="Aspire.Azure.Data.Tables" Version="13.4.6" />
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.4.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="10.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="10.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.8.0" />
     <PackageReference Include="Microsoft.Orleans.BroadcastChannel" Version="10.2.1" />
     <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="10.2.1" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Cosmos" Version="10.2.1" />
