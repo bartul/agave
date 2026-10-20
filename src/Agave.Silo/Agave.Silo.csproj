@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.Orleans.Streaming.EventHubs" Version="10.4.0" />
     <PackageReference Include="Aspire.Azure.Data.Tables" Version="13.6.1" />
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.6.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <PackageReference Include="Microsoft.Extensions.Telemetry" Version="10.10.0" />
     <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.10.0" />
     <PackageReference Include="MinVer" Version="8.0.0">
