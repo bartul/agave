@@ -22,8 +22,8 @@
     <PackageReference Include="Aspire.Azure.Data.Tables" Version="13.6.5" />
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.6.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="10.11.0" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.11.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="11.0.0" />
     <PackageReference Include="MinVer" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
